@@ -2,13 +2,15 @@ package org.sample.backendfia.service;
 
 import org.sample.backendfia.dto.EstudianteDTO;
 import org.sample.backendfia.exception.ResourceNotFoundException;
+import org.sample.backendfia.model.Carrera;
 import org.sample.backendfia.model.Estudiante;
+import org.sample.backendfia.repository.CarreraRepository;
 import org.sample.backendfia.repository.EstudianteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -16,6 +18,16 @@ public class ServiceEstudiante implements IServiceEstudiante {
 
     @Autowired
     private EstudianteRepository estudianteRepository;
+
+    @Autowired
+    private CarreraRepository carreraRepository;
+
+    private static final List<String> CARRERAS_PERMITIDAS = Arrays.asList(
+            "Ingenieria en sistemas de la informacion",
+            "Ingenieria industrial",
+            "Ingenieria civil",
+            "Arquitectura"
+    );
 
     @Override
     public List<EstudianteDTO> findAll() {
@@ -32,10 +44,15 @@ public class ServiceEstudiante implements IServiceEstudiante {
     }
 
     @Override
-    public EstudianteDTO save(EstudianteDTO estudianteDTO) {
-        Estudiante estudiante = convertToEntity(estudianteDTO);
-        Estudiante savedEstudiante = estudianteRepository.save(estudiante);
-        return convertToDto(savedEstudiante);
+    public EstudianteDTO register(EstudianteDTO estudianteDTO) {
+        return save(estudianteDTO);
+    }
+
+    @Override
+    public EstudianteDTO authenticate(String cif, String contrasena) {
+        return estudianteRepository.findByCifAndContrasena(cif, contrasena)
+                .map(this::convertToDto)
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid CIF or password"));
     }
 
     @Override
@@ -44,21 +61,30 @@ public class ServiceEstudiante implements IServiceEstudiante {
     }
 
     @Override
-    public EstudianteDTO register(EstudianteDTO estudianteDTO) {
-        // Aquí podrías agregar lógica adicional como validar que el cif sea único
-        Estudiante estudiante = convertToEntity(estudianteDTO);
-        Estudiante savedEstudiante = estudianteRepository.save(estudiante);
-        return convertToDto(savedEstudiante);
+    public EstudianteDTO findByCif(String cif) {
+        return estudianteRepository.findByCif(cif)
+                .map(this::convertToDto)
+                .orElseThrow(() -> new ResourceNotFoundException("Estudiante not found with CIF: " + cif));
     }
 
     @Override
-    public EstudianteDTO authenticate(String cif, String contrasena) {
-        Optional<Estudiante> estudianteOpt = estudianteRepository.findByCifAndContrasena(cif, contrasena);
-        if (estudianteOpt.isPresent()) {
-            return convertToDto(estudianteOpt.get());
-        } else {
-            throw new IllegalArgumentException("Credenciales incorrectas");
+    public EstudianteDTO save(EstudianteDTO estudianteDTO) {
+        if (!estudianteDTO.getContrasena().equals(estudianteDTO.getConfirmarContrasena())) {
+            throw new IllegalArgumentException("Las contraseñas no coinciden");
         }
+
+        if (!CARRERAS_PERMITIDAS.contains(estudianteDTO.getCarrera())) {
+            throw new IllegalArgumentException("Carrera no permitida");
+        }
+
+        Carrera carrera = carreraRepository.findByNombre(estudianteDTO.getCarrera())
+                .orElseThrow(() -> new ResourceNotFoundException("Carrera not found with name: " + estudianteDTO.getCarrera()));
+
+        Estudiante estudiante = convertToEntity(estudianteDTO);
+        estudiante.setCarrera(carrera);
+
+        Estudiante savedEstudiante = estudianteRepository.save(estudiante);
+        return convertToDto(savedEstudiante);
     }
 
     private EstudianteDTO convertToDto(Estudiante estudiante) {
@@ -68,6 +94,7 @@ public class ServiceEstudiante implements IServiceEstudiante {
         estudianteDTO.setCif(estudiante.getCif());
         estudianteDTO.setEmail(estudiante.getEmail());
         estudianteDTO.setContrasena(estudiante.getContrasena());
+        estudianteDTO.setCarrera(estudiante.getCarrera().getNombre());
         return estudianteDTO;
     }
 

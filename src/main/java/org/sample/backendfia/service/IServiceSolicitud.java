@@ -13,5 +13,5 @@ public interface IServiceSolicitud {
     SolicitudDTO updateFechaCita(Long id, LocalDateTime nuevaFecha);
     SolicitudDTO cambiarCoordinador(Long id, Long nuevoCoordinadorId);
     void cancelarCita(Long id);
-    SolicitudDTO cambiarEstado(Long id, String nuevoEstado); // Añadir este método
+    SolicitudDTO cambiarEstado(Long id, String nuevoEstado);
 }

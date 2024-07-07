@@ -1,10 +1,6 @@
 package org.sample.backendfia.model;
 
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class Estudiante {
@@ -18,7 +14,11 @@ public class Estudiante {
     private String email;
     private String contrasena;
 
-    // Getters y Setters
+    @ManyToOne
+    @JoinColumn(name = "carrera_id", nullable = false)
+    private Carrera carrera;
+
+    // Constructor, Getters y Setters
     public Long getId() {
         return id;
     }
@@ -57,5 +57,13 @@ public class Estudiante {
 
     public void setContrasena(String contrasena) {
         this.contrasena = contrasena;
+    }
+
+    public Carrera getCarrera() {
+        return carrera;
+    }
+
+    public void setCarrera(Carrera carrera) {
+        this.carrera = carrera;
     }
 }

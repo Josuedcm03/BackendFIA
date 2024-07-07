@@ -1,13 +1,11 @@
 package org.sample.backendfia.model;
 
-
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 public class Solicitud {
-
     public static final String PENDIENTE = "Pendiente";
     public static final String APROBADA = "Aprobada";
     public static final String RECHAZADA = "Rechazada";
@@ -18,17 +16,23 @@ public class Solicitud {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String estado;
-    private LocalDateTime fechaSolicitud;
-    private LocalDateTime fechaCita;
-
     @ManyToOne
-    @JoinColumn(name = "estudiante_id")
+    @JoinColumn(name = "estudiante_id", nullable = false)
     private Estudiante estudiante;
 
     @ManyToOne
-    @JoinColumn(name = "coordinador_id")
+    @JoinColumn(name = "coordinador_id", nullable = false)
     private Coordinador coordinador;
+
+    private String estado;
+
+    private LocalDateTime fechaSolicitud;
+
+    private LocalDateTime fechaCita;
+
+    private String motivo;
+
+    private int duracionCita;
 
     // Getters y Setters
     public Long getId() {
@@ -37,6 +41,22 @@ public class Solicitud {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Estudiante getEstudiante() {
+        return estudiante;
+    }
+
+    public void setEstudiante(Estudiante estudiante) {
+        this.estudiante = estudiante;
+    }
+
+    public Coordinador getCoordinador() {
+        return coordinador;
+    }
+
+    public void setCoordinador(Coordinador coordinador) {
+        this.coordinador = coordinador;
     }
 
     public String getEstado() {
@@ -63,19 +83,19 @@ public class Solicitud {
         this.fechaCita = fechaCita;
     }
 
-    public Estudiante getEstudiante() {
-        return estudiante;
+    public String getMotivo() {
+        return motivo;
     }
 
-    public void setEstudiante(Estudiante estudiante) {
-        this.estudiante = estudiante;
+    public void setMotivo(String motivo) {
+        this.motivo = motivo;
     }
 
-    public Coordinador getCoordinador() {
-        return coordinador;
+    public int getDuracionCita() {
+        return duracionCita;
     }
 
-    public void setCoordinador(Coordinador coordinador) {
-        this.coordinador = coordinador;
+    public void setDuracionCita(int duracionCita) {
+        this.duracionCita = duracionCita;
     }
 }

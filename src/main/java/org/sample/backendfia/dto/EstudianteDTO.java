@@ -6,6 +6,8 @@ public class EstudianteDTO {
     private String cif;
     private String email;
     private String contrasena;
+    private String confirmarContrasena;
+    private String carrera;
 
     // Getters y Setters
     public Long getId() {
@@ -46,5 +48,21 @@ public class EstudianteDTO {
 
     public void setContrasena(String contrasena) {
         this.contrasena = contrasena;
+    }
+
+    public String getConfirmarContrasena() {
+        return confirmarContrasena;
+    }
+
+    public void setConfirmarContrasena(String confirmarContrasena) {
+        this.confirmarContrasena = confirmarContrasena;
+    }
+
+    public String getCarrera() {
+        return carrera;
+    }
+
+    public void setCarrera(String carrera) {
+        this.carrera = carrera;
     }
 }

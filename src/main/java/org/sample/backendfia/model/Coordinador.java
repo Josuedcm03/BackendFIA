@@ -1,14 +1,10 @@
 package org.sample.backendfia.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.Data;
+import jakarta.persistence.*;
 
+import java.util.List;
 
 @Entity
-@Data
 public class Coordinador {
 
     @Id
@@ -17,6 +13,14 @@ public class Coordinador {
 
     private String nombre;
     private String email;
+    private String contrasena;
+
+    @ManyToOne
+    @JoinColumn(name = "carrera_id", nullable = false)
+    private Carrera carrera;
+
+    @OneToMany(mappedBy = "coordinador", cascade = CascadeType.ALL)
+    private List<Horario> horarios;
 
     // Getters y Setters
     public Long getId() {
@@ -41,5 +45,29 @@ public class Coordinador {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getContrasena() {
+        return contrasena;
+    }
+
+    public void setContrasena(String contrasena) {
+        this.contrasena = contrasena;
+    }
+
+    public Carrera getCarrera() {
+        return carrera;
+    }
+
+    public void setCarrera(Carrera carrera) {
+        this.carrera = carrera;
+    }
+
+    public List<Horario> getHorarios() {
+        return horarios;
+    }
+
+    public void setHorarios(List<Horario> horarios) {
+        this.horarios = horarios;
     }
 }

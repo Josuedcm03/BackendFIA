@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface EstudianteRepository extends JpaRepository<Estudiante, Long> {
     Optional<Estudiante> findByCifAndContrasena(String cif, String contrasena);
+    Optional<Estudiante> findByCif(String cif);
 }

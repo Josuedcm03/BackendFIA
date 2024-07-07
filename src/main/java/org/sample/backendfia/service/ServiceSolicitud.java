@@ -4,18 +4,20 @@ import org.sample.backendfia.dto.SolicitudDTO;
 import org.sample.backendfia.exception.ResourceNotFoundException;
 import org.sample.backendfia.model.Coordinador;
 import org.sample.backendfia.model.Estudiante;
-import org.sample.backendfia.model.Notificacion;
+import org.sample.backendfia.model.Horario;
 import org.sample.backendfia.model.Solicitud;
 import org.sample.backendfia.repository.CoordinadorRepository;
 import org.sample.backendfia.repository.EstudianteRepository;
-import org.sample.backendfia.repository.NotificacionRepository;
+import org.sample.backendfia.repository.HorarioRepository;
 import org.sample.backendfia.repository.SolicitudRepository;
+import org.sample.backendfia.util.DiaSemanaUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.DayOfWeek;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,10 +34,14 @@ public class ServiceSolicitud implements IServiceSolicitud {
     private CoordinadorRepository coordinadorRepository;
 
     @Autowired
-    private JavaMailSender mailSender;
+    private HorarioRepository horarioRepository;
 
     @Autowired
-    private NotificacionRepository notificacionRepository;
+    private JavaMailSender mailSender;
+
+    private static final int DURACION_PERSONAL = 10;
+    private static final int DURACION_FINANCIERO = 20;
+    private static final int DURACION_ACADEMICO = 20;
 
     @Override
     public List<SolicitudDTO> findAll() {
@@ -58,9 +64,60 @@ public class ServiceSolicitud implements IServiceSolicitud {
                 .orElseThrow(() -> new ResourceNotFoundException("Estudiante not found with id: " + solicitudDTO.getEstudianteId()));
         Coordinador coordinador = coordinadorRepository.findById(solicitudDTO.getCoordinadorId())
                 .orElseThrow(() -> new ResourceNotFoundException("Coordinador not found with id: " + solicitudDTO.getCoordinadorId()));
+
+        // Validar que la fecha no esté en el pasado
+        if (solicitud.getFechaCita().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("La fecha de la cita no puede ser en el pasado.");
+        }
+
+        // Validar que la fecha sea de lunes a viernes
+        DayOfWeek diaSemana = solicitud.getFechaCita().getDayOfWeek();
+        if (diaSemana == DayOfWeek.SATURDAY || diaSemana == DayOfWeek.SUNDAY) {
+            throw new IllegalArgumentException("La fecha de la cita debe ser un día hábil (lunes a viernes).");
+        }
+
+        // Asignar duración de la cita según el motivo
+        switch (solicitudDTO.getMotivo().toLowerCase()) {
+            case "personal":
+                solicitud.setDuracionCita(DURACION_PERSONAL);
+                break;
+            case "financiero":
+                solicitud.setDuracionCita(DURACION_FINANCIERO);
+                break;
+            case "academico":
+                solicitud.setDuracionCita(DURACION_ACADEMICO);
+                break;
+            default:
+                throw new IllegalArgumentException("Motivo no válido: " + solicitudDTO.getMotivo());
+        }
+
+        // Verificar disponibilidad
+        List<Horario> horarios = horarioRepository.findAll();
+        boolean isAvailable = horarios.stream().anyMatch(h ->
+                !solicitud.getFechaCita().toLocalTime().isBefore(h.getHoraInicio()) &&
+                        !solicitud.getFechaCita().toLocalTime().plusMinutes(solicitud.getDuracionCita()).isAfter(h.getHoraFin()) &&
+                        solicitud.getFechaCita().getDayOfWeek().equals(h.getDiaSemana()) &&
+                        h.getEstado().equals("libre")
+        );
+
+        if (!isAvailable) {
+            throw new IllegalArgumentException("El coordinador no está disponible en el horario solicitado.");
+        }
+
         solicitud.setEstudiante(estudiante);
         solicitud.setCoordinador(coordinador);
         Solicitud savedSolicitud = solicitudRepository.save(solicitud);
+
+        // Actualizar el estado del horario
+        horarios.stream().filter(h ->
+                !solicitud.getFechaCita().toLocalTime().isBefore(h.getHoraInicio()) &&
+                        !solicitud.getFechaCita().toLocalTime().plusMinutes(solicitud.getDuracionCita()).isAfter(h.getHoraFin()) &&
+                        solicitud.getFechaCita().getDayOfWeek().equals(h.getDiaSemana())
+        ).forEach(h -> {
+            h.setEstado("cita");
+            horarioRepository.save(h);
+        });
+
         return convertToDto(savedSolicitud);
     }
 
@@ -75,6 +132,17 @@ public class ServiceSolicitud implements IServiceSolicitud {
                 .orElseThrow(() -> new ResourceNotFoundException("Solicitud not found with id: " + id));
 
         if (!solicitud.getEstado().equalsIgnoreCase(Solicitud.APROBADA)) {
+            // Validar que la fecha no esté en el pasado
+            if (nuevaFecha.isBefore(LocalDateTime.now())) {
+                throw new IllegalArgumentException("La fecha de la cita no puede ser en el pasado.");
+            }
+
+            // Validar que la fecha sea de lunes a viernes
+            DayOfWeek diaSemana = nuevaFecha.getDayOfWeek();
+            if (diaSemana == DayOfWeek.SATURDAY || diaSemana == DayOfWeek.SUNDAY) {
+                throw new IllegalArgumentException("La fecha de la cita debe ser un día hábil (lunes a viernes).");
+            }
+
             solicitud.setFechaCita(nuevaFecha);
             solicitudRepository.save(solicitud);
         } else {
@@ -124,19 +192,23 @@ public class ServiceSolicitud implements IServiceSolicitud {
     }
 
     private void enviarCorreoCambioEstado(Solicitud solicitud) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(solicitud.getEstudiante().getEmail());
-        message.setSubject("Cambio de estado de su solicitud");
-        message.setText("Su solicitud ha cambiado al estado: " + solicitud.getEstado());
-        mailSender.send(message);
+        String asunto = "Cambio de estado de su solicitud";
+        String mensajeEstudiante = "Su solicitud ha cambiado al estado: " + solicitud.getEstado();
+        String mensajeCoordinador = "La solicitud de cita ha sido aceptada para el estudiante: " + solicitud.getEstudiante().getNombreCompleto();
 
-        // Guardar la notificación en la base de datos
-        Notificacion notificacion = new Notificacion();
-        notificacion.setDestinatario(solicitud.getEstudiante().getEmail());
-        notificacion.setAsunto("Cambio de estado de su solicitud");
-        notificacion.setMensaje("Su solicitud ha cambiado al estado: " + solicitud.getEstado());
-        notificacion.setFechaEnvio(LocalDateTime.now());
-        notificacionRepository.save(notificacion);
+        enviarCorreo(solicitud.getEstudiante().getEmail(), asunto, mensajeEstudiante);
+
+        if (solicitud.getEstado().equals(Solicitud.APROBADA)) {
+            enviarCorreo(solicitud.getCoordinador().getEmail(), asunto, mensajeCoordinador);
+        }
+    }
+
+    private void enviarCorreo(String destinatario, String asunto, String mensaje) {
+        SimpleMailMessage email = new SimpleMailMessage();
+        email.setTo(destinatario);
+        email.setSubject(asunto);
+        email.setText(mensaje);
+        mailSender.send(email);
     }
 
     private SolicitudDTO convertToDto(Solicitud solicitud) {
@@ -147,6 +219,9 @@ public class ServiceSolicitud implements IServiceSolicitud {
         solicitudDTO.setFechaCita(solicitud.getFechaCita());
         solicitudDTO.setEstudianteId(solicitud.getEstudiante().getId());
         solicitudDTO.setCoordinadorId(solicitud.getCoordinador().getId());
+        solicitudDTO.setMotivo(solicitud.getMotivo());
+        solicitudDTO.setDuracionCita(solicitud.getDuracionCita());
+        solicitudDTO.setDiaSemana(DiaSemanaUtil.getDiaSemanaEnEspanol(solicitud.getFechaCita().getDayOfWeek())); // Asignar el día de la semana en español
         return solicitudDTO;
     }
 
@@ -156,6 +231,8 @@ public class ServiceSolicitud implements IServiceSolicitud {
         solicitud.setEstado(solicitudDTO.getEstado());
         solicitud.setFechaSolicitud(solicitudDTO.getFechaSolicitud());
         solicitud.setFechaCita(solicitudDTO.getFechaCita());
+        solicitud.setMotivo(solicitudDTO.getMotivo());
+        solicitud.setDuracionCita(solicitudDTO.getDuracionCita());
         return solicitud;
     }
 }

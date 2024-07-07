@@ -9,6 +9,9 @@ public class SolicitudDTO {
     private LocalDateTime fechaCita;
     private Long estudianteId;
     private Long coordinadorId;
+    private String motivo;
+    private int duracionCita;
+    private String diaSemana; // Nuevo campo para el día de la semana en español
 
     // Getters y Setters
     public Long getId() {
@@ -57,5 +60,29 @@ public class SolicitudDTO {
 
     public void setCoordinadorId(Long coordinadorId) {
         this.coordinadorId = coordinadorId;
+    }
+
+    public String getMotivo() {
+        return motivo;
+    }
+
+    public void setMotivo(String motivo) {
+        this.motivo = motivo;
+    }
+
+    public int getDuracionCita() {
+        return duracionCita;
+    }
+
+    public void setDuracionCita(int duracionCita) {
+        this.duracionCita = duracionCita;
+    }
+
+    public String getDiaSemana() {
+        return diaSemana;
+    }
+
+    public void setDiaSemana(String diaSemana) {
+        this.diaSemana = diaSemana;
     }
 }
