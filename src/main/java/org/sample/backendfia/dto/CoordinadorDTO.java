@@ -52,7 +52,7 @@ public class CoordinadorDTO {
         this.confirmarContrasena = confirmarContrasena;
     }
 
-    public String getCarreraId() {
+    public Long getCarreraId() {
         return carreraId;
     }
 

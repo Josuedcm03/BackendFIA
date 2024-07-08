@@ -30,7 +30,7 @@ public class Carrera {
         this.id = id;
     }
 
-    public Long getNombre() {
+    public String getNombre() {
         return nombre;
     }
 
