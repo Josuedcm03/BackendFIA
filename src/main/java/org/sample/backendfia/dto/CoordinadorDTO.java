@@ -1,6 +1,5 @@
 package org.sample.backendfia.dto;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class CoordinadorDTO {
@@ -8,9 +7,9 @@ public class CoordinadorDTO {
     private String nombre;
     private String email;
     private String contrasena;
-    private String confirmarContrasena;
-    private Long carreraId;
-    private List<HorarioDTO> horarios = new ArrayList<>(); // Inicializar la lista
+    private String confirmarContrasena;  // Añadido
+    private Long carreraId;  // Cambiado a carreraId
+    private List<HorarioDTO> horarios;
 
     // Getters y Setters
     public Long getId() {
@@ -53,7 +52,7 @@ public class CoordinadorDTO {
         this.confirmarContrasena = confirmarContrasena;
     }
 
-    public Long getCarreraId() {
+    public String getCarreraId() {
         return carreraId;
     }
 

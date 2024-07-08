@@ -1,14 +1,12 @@
 package org.sample.backendfia.model;
 
-
 import jakarta.persistence.*;
-
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
 public class Horario {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,21 +15,17 @@ public class Horario {
     @JoinColumn(name = "coordinador_id")
     private Coordinador coordinador;
 
-    @Column(name = "dia_semana")
-    @Enumerated(EnumType.ORDINAL)
     private DayOfWeek diaSemana;
 
-    @Column(name = "hora_inicio")
+    private LocalDate fecha;
+
     private LocalTime horaInicio;
 
-    @Column(name = "hora_fin")
     private LocalTime horaFin;
 
-    @Column(name = "estado")
     private String estado;
 
     // Getters y Setters
-
     public Long getId() {
         return id;
     }
@@ -54,6 +48,14 @@ public class Horario {
 
     public void setDiaSemana(DayOfWeek diaSemana) {
         this.diaSemana = diaSemana;
+    }
+
+    public LocalDate getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(LocalDate fecha) {
+        this.fecha = fecha;
     }
 
     public LocalTime getHoraInicio() {

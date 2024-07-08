@@ -1,7 +1,6 @@
 package org.sample.backendfia.model;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity

@@ -81,7 +81,7 @@ public class ServiceEstudiante implements IServiceEstudiante {
                 .orElseThrow(() -> new ResourceNotFoundException("Carrera not found with name: " + estudianteDTO.getCarrera()));
 
         Estudiante estudiante = convertToEntity(estudianteDTO);
-        estudiante.setCarrera(carrera);
+        estudiante.setCarrera(carrera.getNombre());
 
         Estudiante savedEstudiante = estudianteRepository.save(estudiante);
         return convertToDto(savedEstudiante);
@@ -90,21 +90,22 @@ public class ServiceEstudiante implements IServiceEstudiante {
     private EstudianteDTO convertToDto(Estudiante estudiante) {
         EstudianteDTO estudianteDTO = new EstudianteDTO();
         estudianteDTO.setId(estudiante.getId());
-        estudianteDTO.setNombreCompleto(estudiante.getNombreCompleto());
+        estudianteDTO.setNombreCompleto(estudiante.getNombre());
         estudianteDTO.setCif(estudiante.getCif());
         estudianteDTO.setEmail(estudiante.getEmail());
         estudianteDTO.setContrasena(estudiante.getContrasena());
-        estudianteDTO.setCarrera(estudiante.getCarrera().getNombre());
+        estudianteDTO.setCarrera(estudiante.getCarrera());
         return estudianteDTO;
     }
 
     private Estudiante convertToEntity(EstudianteDTO estudianteDTO) {
         Estudiante estudiante = new Estudiante();
         estudiante.setId(estudianteDTO.getId());
-        estudiante.setNombreCompleto(estudianteDTO.getNombreCompleto());
+        estudiante.setNombre(estudianteDTO.getNombreCompleto());
         estudiante.setCif(estudianteDTO.getCif());
         estudiante.setEmail(estudianteDTO.getEmail());
         estudiante.setContrasena(estudianteDTO.getContrasena());
+        estudiante.setCarrera(estudianteDTO.getCarrera());
         return estudiante;
     }
 }

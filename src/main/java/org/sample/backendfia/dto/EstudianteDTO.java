@@ -2,11 +2,11 @@ package org.sample.backendfia.dto;
 
 public class EstudianteDTO {
     private Long id;
-    private String nombreCompleto;
-    private String cif;
+    private String nombreCompleto;  // Cambiado de 'nombre' a 'nombreCompleto'
     private String email;
+    private String cif;
     private String contrasena;
-    private String confirmarContrasena;
+    private String confirmarContrasena;  // Añadido
     private String carrera;
 
     // Getters y Setters
@@ -26,20 +26,20 @@ public class EstudianteDTO {
         this.nombreCompleto = nombreCompleto;
     }
 
-    public String getCif() {
-        return cif;
-    }
-
-    public void setCif(String cif) {
-        this.cif = cif;
-    }
-
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getCif() {
+        return cif;
+    }
+
+    public void setCif(String cif) {
+        this.cif = cif;
     }
 
     public String getContrasena() {

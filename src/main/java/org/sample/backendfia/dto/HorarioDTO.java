@@ -1,6 +1,7 @@
 package org.sample.backendfia.dto;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class HorarioDTO {
@@ -8,6 +9,7 @@ public class HorarioDTO {
     private LocalTime horaInicio;
     private LocalTime horaFin;
     private DayOfWeek diaSemana;
+    private LocalDate fecha;
     private String estado;
 
     // Getters y Setters
@@ -41,6 +43,14 @@ public class HorarioDTO {
 
     public void setDiaSemana(DayOfWeek diaSemana) {
         this.diaSemana = diaSemana;
+    }
+
+    public LocalDate getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(LocalDate fecha) {
+        this.fecha = fecha;
     }
 
     public String getEstado() {

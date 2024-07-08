@@ -9,6 +9,7 @@ import org.sample.backendfia.model.Horario;
 import org.sample.backendfia.repository.CarreraRepository;
 import org.sample.backendfia.repository.CoordinadorRepository;
 import org.sample.backendfia.repository.HorarioRepository;
+import org.sample.backendfia.service.IServiceCoordinador;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -57,8 +58,8 @@ public class ServiceCoordinador implements IServiceCoordinador {
             throw new IllegalArgumentException("Las contraseñas no coinciden");
         }
 
-        Carrera carrera = carreraRepository.findById(coordinadorDTO.getCarreraId())
-                .orElseThrow(() -> new ResourceNotFoundException("Carrera not found with id: " + coordinadorDTO.getCarreraId()));
+        Carrera carrera = carreraRepository.findByNombre(coordinadorDTO.getCarreraId())
+                .orElseThrow(() -> new ResourceNotFoundException("Carrera not found with name: " + coordinadorDTO.getCarreraId()));
 
         Coordinador coordinador = convertToEntity(coordinadorDTO);
         coordinador.setCarrera(carrera);
@@ -87,11 +88,11 @@ public class ServiceCoordinador implements IServiceCoordinador {
             if (dia == DayOfWeek.SATURDAY || dia == DayOfWeek.SUNDAY) {
                 continue; // Excluir sábado y domingo
             }
-            for (LocalTime hora = LocalTime.of(9, 0); hora.isBefore(LocalTime.of(12, 0)); hora = hora.plusMinutes(10)) {
-                horarios.add(crearHorario(coordinador, dia, hora, hora.plusMinutes(10)));
+            for (LocalTime hora = LocalTime.of(9, 0); hora.isBefore(LocalTime.of(12, 0)); hora = hora.plusMinutes(30)) {
+                horarios.add(crearHorario(coordinador, dia, hora, hora.plusMinutes(30)));
             }
-            for (LocalTime hora = LocalTime.of(13, 0); hora.isBefore(LocalTime.of(16, 0)); hora = hora.plusMinutes(10)) {
-                horarios.add(crearHorario(coordinador, dia, hora, hora.plusMinutes(10)));
+            for (LocalTime hora = LocalTime.of(13, 0); hora.isBefore(LocalTime.of(16, 0)); hora = hora.plusMinutes(30)) {
+                horarios.add(crearHorario(coordinador, dia, hora, hora.plusMinutes(30)));
             }
         }
         horarioRepository.saveAll(horarios);
@@ -113,7 +114,7 @@ public class ServiceCoordinador implements IServiceCoordinador {
         coordinadorDTO.setNombre(coordinador.getNombre());
         coordinadorDTO.setEmail(coordinador.getEmail());
         coordinadorDTO.setContrasena(coordinador.getContrasena());
-        coordinadorDTO.setCarreraId(coordinador.getCarrera().getId());
+        coordinadorDTO.setCarreraId(coordinador.getCarrera().getNombre());
         coordinadorDTO.setHorarios(coordinador.getHorarios() != null ? coordinador.getHorarios().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList()) : new ArrayList<>());
