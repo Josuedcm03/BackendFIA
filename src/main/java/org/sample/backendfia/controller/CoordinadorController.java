@@ -1,6 +1,7 @@
 package org.sample.backendfia.controller;
 
 import org.sample.backendfia.dto.CoordinadorDTO;
+import org.sample.backendfia.dto.HorarioDTO;
 import org.sample.backendfia.service.IServiceCoordinador;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,11 @@ public class CoordinadorController {
     @GetMapping("/{id}")
     public CoordinadorDTO getCoordinadorById(@PathVariable Long id) {
         return serviceCoordinador.findById(id);
+    }
+
+    @GetMapping("/{id}/disponibilidad")
+    public List<HorarioDTO> getDisponibilidad(@PathVariable Long id) {
+        return serviceCoordinador.getDisponibilidad(id);
     }
 
     @DeleteMapping("/{id}")

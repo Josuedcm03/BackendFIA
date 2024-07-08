@@ -1,5 +1,6 @@
 package org.sample.backendfia.model;
 
+
 import jakarta.persistence.*;
 
 import java.time.DayOfWeek;
@@ -13,19 +14,24 @@ public class Horario {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "coordinador_id", nullable = false)
+    @JoinColumn(name = "coordinador_id")
     private Coordinador coordinador;
 
-    @Enumerated(EnumType.STRING)
+    @Column(name = "dia_semana")
+    @Enumerated(EnumType.ORDINAL)
     private DayOfWeek diaSemana;
 
+    @Column(name = "hora_inicio")
     private LocalTime horaInicio;
 
+    @Column(name = "hora_fin")
     private LocalTime horaFin;
 
+    @Column(name = "estado")
     private String estado;
 
     // Getters y Setters
+
     public Long getId() {
         return id;
     }

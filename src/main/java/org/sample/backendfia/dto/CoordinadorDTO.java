@@ -1,5 +1,6 @@
 package org.sample.backendfia.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CoordinadorDTO {
@@ -9,7 +10,7 @@ public class CoordinadorDTO {
     private String contrasena;
     private String confirmarContrasena;
     private Long carreraId;
-    private List<HorarioDTO> horarios;
+    private List<HorarioDTO> horarios = new ArrayList<>(); // Inicializar la lista
 
     // Getters y Setters
     public Long getId() {

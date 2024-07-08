@@ -25,10 +25,10 @@ public class ServiceCoordinador implements IServiceCoordinador {
     private CoordinadorRepository coordinadorRepository;
 
     @Autowired
-    private CarreraRepository carreraRepository;
+    private HorarioRepository horarioRepository;
 
     @Autowired
-    private HorarioRepository horarioRepository;
+    private CarreraRepository carreraRepository;
 
     @Override
     public List<CoordinadorDTO> findAll() {
@@ -62,7 +62,6 @@ public class ServiceCoordinador implements IServiceCoordinador {
 
         Coordinador coordinador = convertToEntity(coordinadorDTO);
         coordinador.setCarrera(carrera);
-
         Coordinador savedCoordinador = coordinadorRepository.save(coordinador);
         inicializarHorarios(savedCoordinador);
         return convertToDto(savedCoordinador);
@@ -115,9 +114,9 @@ public class ServiceCoordinador implements IServiceCoordinador {
         coordinadorDTO.setEmail(coordinador.getEmail());
         coordinadorDTO.setContrasena(coordinador.getContrasena());
         coordinadorDTO.setCarreraId(coordinador.getCarrera().getId());
-        coordinadorDTO.setHorarios(coordinador.getHorarios().stream()
+        coordinadorDTO.setHorarios(coordinador.getHorarios() != null ? coordinador.getHorarios().stream()
                 .map(this::convertToDto)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()) : new ArrayList<>());
         return coordinadorDTO;
     }
 
@@ -127,9 +126,9 @@ public class ServiceCoordinador implements IServiceCoordinador {
         coordinador.setNombre(coordinadorDTO.getNombre());
         coordinador.setEmail(coordinadorDTO.getEmail());
         coordinador.setContrasena(coordinadorDTO.getContrasena());
-        coordinador.setHorarios(coordinadorDTO.getHorarios().stream()
+        coordinador.setHorarios(coordinadorDTO.getHorarios() != null ? coordinadorDTO.getHorarios().stream()
                 .map(this::convertToEntity)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()) : new ArrayList<>());
         return coordinador;
     }
 
@@ -138,7 +137,7 @@ public class ServiceCoordinador implements IServiceCoordinador {
         horarioDTO.setId(horario.getId());
         horarioDTO.setHoraInicio(horario.getHoraInicio());
         horarioDTO.setHoraFin(horario.getHoraFin());
-        horarioDTO.setDiaSemana(horario.getDiaSemana()); // Mantener como DayOfWeek
+        horarioDTO.setDiaSemana(horario.getDiaSemana());
         horarioDTO.setEstado(horario.getEstado());
         return horarioDTO;
     }
@@ -148,7 +147,7 @@ public class ServiceCoordinador implements IServiceCoordinador {
         horario.setId(horarioDTO.getId());
         horario.setHoraInicio(horarioDTO.getHoraInicio());
         horario.setHoraFin(horarioDTO.getHoraFin());
-        horario.setDiaSemana(horarioDTO.getDiaSemana()); // Mantener como DayOfWeek
+        horario.setDiaSemana(horarioDTO.getDiaSemana());
         horario.setEstado(horarioDTO.getEstado());
         return horario;
     }

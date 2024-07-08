@@ -11,5 +11,5 @@ public interface IServiceCoordinador {
     CoordinadorDTO save(CoordinadorDTO coordinadorDTO);
     void deleteById(Long id);
     List<HorarioDTO> getDisponibilidad(Long coordinadorId);
-    CoordinadorDTO findByEmail(String email); // Añadir este método
+    CoordinadorDTO findByEmail(String email); // Añadir esta línea
 }
