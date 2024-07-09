@@ -17,18 +17,9 @@ public class EstudianteController {
     private IServiceEstudiante serviceEstudiante;
 
     @PostMapping("/register")
-    public EstudianteDTO registerEstudiante(@RequestBody EstudianteDTO estudianteDTO) {
-        return serviceEstudiante.save(estudianteDTO);
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody EstudianteDTO estudianteDTO) {
-        EstudianteDTO estudiante = serviceEstudiante.findByCif(estudianteDTO.getCif());
-        if (estudiante != null && estudianteDTO.getContrasena().equals(estudiante.getContrasena())) {
-            return ResponseEntity.ok("Login successful");
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-        }
+    public ResponseEntity<EstudianteDTO> registerEstudiante(@RequestBody EstudianteDTO estudianteDTO) {
+        EstudianteDTO registrado = serviceEstudiante.register(estudianteDTO);
+        return new ResponseEntity<>(registrado, HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -45,5 +36,16 @@ public class EstudianteController {
     public ResponseEntity<Void> deleteEstudiante(@PathVariable Long id) {
         serviceEstudiante.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<EstudianteDTO> authenticateEstudiante(@RequestBody EstudianteDTO estudianteDTO) {
+        EstudianteDTO authenticated = serviceEstudiante.authenticate(estudianteDTO.getCif(), estudianteDTO.getContrasena());
+        return new ResponseEntity<>(authenticated, HttpStatus.OK);
+    }
+
+    @GetMapping("/cif/{cif}")
+    public EstudianteDTO getEstudianteByCif(@PathVariable String cif) {
+        return serviceEstudiante.findByCif(cif);
     }
 }

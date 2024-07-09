@@ -1,6 +1,7 @@
 package org.sample.backendfia.dto;
 
 import java.time.LocalDateTime;
+import org.sample.backendfia.model.Solicitud.Motivo;
 
 public class SolicitudDTO {
     private Long id;
@@ -9,7 +10,7 @@ public class SolicitudDTO {
     private LocalDateTime fechaCita;
     private Long estudianteId;
     private Long coordinadorId;
-    private String motivo;
+    private Motivo motivo; // Utilizar la enumeración
     private int duracionCita;
     private String diaSemana; // Nuevo campo para el día de la semana en español
 
@@ -62,11 +63,11 @@ public class SolicitudDTO {
         this.coordinadorId = coordinadorId;
     }
 
-    public String getMotivo() {
+    public Motivo getMotivo() {
         return motivo;
     }
 
-    public void setMotivo(String motivo) {
+    public void setMotivo(Motivo motivo) {
         this.motivo = motivo;
     }
 

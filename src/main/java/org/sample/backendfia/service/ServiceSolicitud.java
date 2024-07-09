@@ -63,6 +63,11 @@ public class ServiceSolicitud implements IServiceSolicitud {
             throw new IllegalArgumentException("El coordinador no está disponible en el horario solicitado.");
         }
 
+        // Validar el motivo
+        if (solicitud.getMotivo() == null) {
+            throw new IllegalArgumentException("El motivo de la cita es obligatorio.");
+        }
+
         // Cambiar el estado del horario a ocupado
         Horario horario = horarios.get(0);
         horario.setEstado("ocupado");
@@ -131,8 +136,6 @@ public class ServiceSolicitud implements IServiceSolicitud {
             throw new IllegalArgumentException("El nuevo coordinador no está disponible en el horario solicitado.");
         }
 
-
-
         solicitud.setCoordinador(nuevoCoordinador);
         Solicitud updatedSolicitud = solicitudRepository.save(solicitud);
         return convertToDto(updatedSolicitud);
@@ -197,10 +200,18 @@ public class ServiceSolicitud implements IServiceSolicitud {
         solicitud.setFechaSolicitud(solicitudDTO.getFechaSolicitud());
         solicitud.setFechaCita(solicitudDTO.getFechaCita());
 
+        // Validar que el ID del coordinador no sea nulo
+        if (solicitudDTO.getCoordinadorId() == null) {
+            throw new IllegalArgumentException("Coordinador ID no debe ser null");
+        }
         Coordinador coordinador = coordinadorRepository.findById(solicitudDTO.getCoordinadorId())
-                .orElseThrow(() -> new ResourceNotFoundException("Coordinador not found with id: " + solicitudDTO.getCoordinadorId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Coordinador no encontrado con id: " + solicitudDTO.getCoordinadorId()));
         solicitud.setCoordinador(coordinador);
 
+        // Validar que el ID del estudiante no sea nulo
+        if (solicitudDTO.getEstudianteId() == null) {
+            throw new IllegalArgumentException("Estudiante ID must not be null");
+        }
         Estudiante estudiante = estudianteRepository.findById(solicitudDTO.getEstudianteId())
                 .orElseThrow(() -> new ResourceNotFoundException("Estudiante not found with id: " + solicitudDTO.getEstudianteId()));
         solicitud.setEstudiante(estudiante);
@@ -209,4 +220,5 @@ public class ServiceSolicitud implements IServiceSolicitud {
         solicitud.setDuracionCita(solicitudDTO.getDuracionCita());
         return solicitud;
     }
+
 }

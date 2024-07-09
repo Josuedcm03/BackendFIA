@@ -90,7 +90,7 @@ public class ServiceEstudiante implements IServiceEstudiante {
         estudianteDTO.setCif(estudiante.getCif());
         estudianteDTO.setEmail(estudiante.getEmail());
         estudianteDTO.setContrasena(estudiante.getContrasena());
-        estudianteDTO.setCarreraId(estudiante.getCarrera().getId());
+        estudianteDTO.setCarreraId(estudiante.getCarrera().getId()); // Usar ID de carrera
         return estudianteDTO;
     }
 
@@ -103,5 +103,4 @@ public class ServiceEstudiante implements IServiceEstudiante {
         estudiante.setContrasena(estudianteDTO.getContrasena());
         return estudiante;
     }
-
 }

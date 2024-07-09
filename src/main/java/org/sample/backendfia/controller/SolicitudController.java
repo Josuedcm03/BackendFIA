@@ -27,14 +27,30 @@ public class SolicitudController {
     }
 
     @PostMapping
-    public SolicitudDTO createSolicitud(@RequestBody SolicitudDTO solicitudDTO) {
-        return serviceSolicitud.save(solicitudDTO);
+    public ResponseEntity<SolicitudDTO> createSolicitud(@RequestBody SolicitudDTO solicitudDTO) {
+        SolicitudDTO createdSolicitud = serviceSolicitud.save(solicitudDTO);
+        return new ResponseEntity<>(createdSolicitud, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public SolicitudDTO updateSolicitud(@PathVariable Long id, @RequestBody SolicitudDTO solicitudDTO) {
-        solicitudDTO.setId(id);
-        return serviceSolicitud.save(solicitudDTO);
+    public SolicitudDTO updateFechaCita(@PathVariable Long id, @RequestBody SolicitudDTO solicitudDTO) {
+        return serviceSolicitud.updateFechaCita(id, solicitudDTO.getFechaCita());
+    }
+
+    @PutMapping("/{id}/coordinador")
+    public SolicitudDTO cambiarCoordinador(@PathVariable Long id, @RequestBody Long nuevoCoordinadorId) {
+        return serviceSolicitud.cambiarCoordinador(id, nuevoCoordinadorId);
+    }
+
+    @PutMapping("/{id}/cancelar")
+    public ResponseEntity<Void> cancelarCita(@PathVariable Long id) {
+        serviceSolicitud.cancelarCita(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/estado")
+    public SolicitudDTO cambiarEstado(@PathVariable Long id, @RequestBody String nuevoEstado) {
+        return serviceSolicitud.cambiarEstado(id, nuevoEstado);
     }
 
     @DeleteMapping("/{id}")
