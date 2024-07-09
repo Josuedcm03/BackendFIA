@@ -14,4 +14,5 @@ public interface IServiceSolicitud {
     SolicitudDTO cambiarCoordinador(Long id, Long nuevoCoordinadorId);
     void cancelarCita(Long id);
     SolicitudDTO cambiarEstado(Long id, String nuevoEstado);
+    List<SolicitudDTO> findByEstudianteId(Long estudianteId);
 }

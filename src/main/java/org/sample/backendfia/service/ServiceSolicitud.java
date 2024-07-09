@@ -131,19 +131,7 @@ public class ServiceSolicitud implements IServiceSolicitud {
             throw new IllegalArgumentException("El nuevo coordinador no está disponible en el horario solicitado.");
         }
 
-        // Cambiar el estado del horario del coordinador anterior a libre
-        Horario horarioAnterior = horarioRepository.findByCoordinadorIdAndDiaSemanaAndHoraInicio(
-                solicitud.getCoordinador().getId(),
-                solicitud.getFechaCita().getDayOfWeek(),
-                solicitud.getFechaCita().toLocalTime()
-        ).get(0);
-        horarioAnterior.setEstado("libre");
-        horarioRepository.save(horarioAnterior);
 
-        // Cambiar el estado del nuevo horario a ocupado
-        Horario nuevoHorario = horarios.get(0);
-        nuevoHorario.setEstado("ocupado");
-        horarioRepository.save(nuevoHorario);
 
         solicitud.setCoordinador(nuevoCoordinador);
         Solicitud updatedSolicitud = solicitudRepository.save(solicitud);
@@ -176,6 +164,13 @@ public class ServiceSolicitud implements IServiceSolicitud {
         solicitud.setEstado(nuevoEstado);
         Solicitud updatedSolicitud = solicitudRepository.save(solicitud);
         return convertToDto(updatedSolicitud);
+    }
+
+    @Override
+    public List<SolicitudDTO> findByEstudianteId(Long estudianteId) {
+        return solicitudRepository.findByEstudianteId(estudianteId).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
     private SolicitudDTO convertToDto(Solicitud solicitud) {
