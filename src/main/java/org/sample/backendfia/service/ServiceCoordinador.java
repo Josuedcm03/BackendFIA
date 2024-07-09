@@ -58,8 +58,8 @@ public class ServiceCoordinador implements IServiceCoordinador {
             throw new IllegalArgumentException("Las contraseñas no coinciden");
         }
 
-        Carrera carrera = carreraRepository.findByNombre(coordinadorDTO.getCarreraId())
-                .orElseThrow(() -> new ResourceNotFoundException("Carrera not found with name: " + coordinadorDTO.getCarreraId()));
+        Carrera carrera = carreraRepository.findById(coordinadorDTO.getCarreraId())
+                .orElseThrow(() -> new ResourceNotFoundException("Carrera not found with id: " + coordinadorDTO.getCarreraId()));
 
         Coordinador coordinador = convertToEntity(coordinadorDTO);
         coordinador.setCarrera(carrera);
@@ -114,7 +114,7 @@ public class ServiceCoordinador implements IServiceCoordinador {
         coordinadorDTO.setNombre(coordinador.getNombre());
         coordinadorDTO.setEmail(coordinador.getEmail());
         coordinadorDTO.setContrasena(coordinador.getContrasena());
-        coordinadorDTO.setCarreraId(coordinador.getCarrera().getNombre());
+        coordinadorDTO.setCarreraId(coordinador.getCarrera().getId()); // Asignar el ID de la carrera como Long
         coordinadorDTO.setHorarios(coordinador.getHorarios() != null ? coordinador.getHorarios().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList()) : new ArrayList<>());
@@ -127,6 +127,11 @@ public class ServiceCoordinador implements IServiceCoordinador {
         coordinador.setNombre(coordinadorDTO.getNombre());
         coordinador.setEmail(coordinadorDTO.getEmail());
         coordinador.setContrasena(coordinadorDTO.getContrasena());
+
+        Carrera carrera = carreraRepository.findById(coordinadorDTO.getCarreraId())
+                .orElseThrow(() -> new ResourceNotFoundException("Carrera not found with id: " + coordinadorDTO.getCarreraId()));
+        coordinador.setCarrera(carrera);
+
         coordinador.setHorarios(coordinadorDTO.getHorarios() != null ? coordinadorDTO.getHorarios().stream()
                 .map(this::convertToEntity)
                 .collect(Collectors.toList()) : new ArrayList<>());

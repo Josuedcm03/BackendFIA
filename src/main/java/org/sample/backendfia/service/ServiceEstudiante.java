@@ -73,15 +73,11 @@ public class ServiceEstudiante implements IServiceEstudiante {
             throw new IllegalArgumentException("Las contraseñas no coinciden");
         }
 
-        if (!CARRERAS_PERMITIDAS.contains(estudianteDTO.getCarrera())) {
-            throw new IllegalArgumentException("Carrera no permitida");
-        }
-
-        Carrera carrera = carreraRepository.findByNombre(estudianteDTO.getCarrera())
-                .orElseThrow(() -> new ResourceNotFoundException("Carrera not found with name: " + estudianteDTO.getCarrera()));
+        Carrera carrera = carreraRepository.findById(estudianteDTO.getCarreraId())
+                .orElseThrow(() -> new ResourceNotFoundException("Carrera not found with id: " + estudianteDTO.getCarreraId()));
 
         Estudiante estudiante = convertToEntity(estudianteDTO);
-        estudiante.setCarrera(carrera.getNombre());
+        estudiante.setCarrera(carrera);
 
         Estudiante savedEstudiante = estudianteRepository.save(estudiante);
         return convertToDto(savedEstudiante);
@@ -90,22 +86,22 @@ public class ServiceEstudiante implements IServiceEstudiante {
     private EstudianteDTO convertToDto(Estudiante estudiante) {
         EstudianteDTO estudianteDTO = new EstudianteDTO();
         estudianteDTO.setId(estudiante.getId());
-        estudianteDTO.setNombreCompleto(estudiante.getNombre());
+        estudianteDTO.setNombre(estudiante.getNombre());
         estudianteDTO.setCif(estudiante.getCif());
         estudianteDTO.setEmail(estudiante.getEmail());
         estudianteDTO.setContrasena(estudiante.getContrasena());
-        estudianteDTO.setCarrera(estudiante.getCarrera());
+        estudianteDTO.setCarreraId(estudiante.getCarrera().getId());
         return estudianteDTO;
     }
 
     private Estudiante convertToEntity(EstudianteDTO estudianteDTO) {
         Estudiante estudiante = new Estudiante();
         estudiante.setId(estudianteDTO.getId());
-        estudiante.setNombre(estudianteDTO.getNombreCompleto());
+        estudiante.setNombre(estudianteDTO.getNombre());
         estudiante.setCif(estudianteDTO.getCif());
         estudiante.setEmail(estudianteDTO.getEmail());
         estudiante.setContrasena(estudianteDTO.getContrasena());
-        estudiante.setCarrera(estudianteDTO.getCarrera());
         return estudiante;
     }
+
 }

@@ -1,22 +1,20 @@
 package org.sample.backendfia.model;
 
 import jakarta.persistence.*;
-import java.util.List;
 
 @Entity
 public class Estudiante {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String nombre;
     private String email;
     private String cif;
     private String contrasena;
-    private String carrera;  // Asegúrate de que esta propiedad existe en la entidad
 
-    @OneToMany(mappedBy = "estudiante")
-    private List<Solicitud> solicitudes;
+    @ManyToOne
+    @JoinColumn(name = "carrera_id")
+    private Carrera carrera;
 
     // Getters y Setters
     public Long getId() {
@@ -59,19 +57,11 @@ public class Estudiante {
         this.contrasena = contrasena;
     }
 
-    public String getCarrera() {
+    public Carrera getCarrera() {
         return carrera;
     }
 
-    public void setCarrera(String carrera) {
+    public void setCarrera(Carrera carrera) {
         this.carrera = carrera;
-    }
-
-    public List<Solicitud> getSolicitudes() {
-        return solicitudes;
-    }
-
-    public void setSolicitudes(List<Solicitud> solicitudes) {
-        this.solicitudes = solicitudes;
     }
 }

@@ -2,12 +2,12 @@ package org.sample.backendfia.dto;
 
 public class EstudianteDTO {
     private Long id;
-    private String nombreCompleto;  // Cambiado de 'nombre' a 'nombreCompleto'
+    private String nombre;
     private String email;
     private String cif;
     private String contrasena;
-    private String confirmarContrasena;  // Añadido
-    private String carrera;
+    private String confirmarContrasena;  // Añadir este campo si falta
+    private Long carreraId; // Añadir este campo si falta
 
     // Getters y Setters
     public Long getId() {
@@ -18,12 +18,12 @@ public class EstudianteDTO {
         this.id = id;
     }
 
-    public String getNombreCompleto() {
-        return nombreCompleto;
+    public String getNombre() {
+        return nombre;
     }
 
-    public void setNombreCompleto(String nombreCompleto) {
-        this.nombreCompleto = nombreCompleto;
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
     public String getEmail() {
@@ -58,11 +58,11 @@ public class EstudianteDTO {
         this.confirmarContrasena = confirmarContrasena;
     }
 
-    public String getCarrera() {
-        return carrera;
+    public Long getCarreraId() {
+        return carreraId;
     }
 
-    public void setCarrera(String carrera) {
-        this.carrera = carrera;
+    public void setCarreraId(Long carreraId) {
+        this.carreraId = carreraId;
     }
 }

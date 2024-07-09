@@ -7,9 +7,9 @@ public class CoordinadorDTO {
     private String nombre;
     private String email;
     private String contrasena;
-    private String confirmarContrasena;  // Añadido
-    private Long carreraId;  // Cambiado a carreraId
+    private Long carreraId; // Debe ser Long, no String
     private List<HorarioDTO> horarios;
+    private String confirmarContrasena;
 
     // Getters y Setters
     public Long getId() {
@@ -44,14 +44,6 @@ public class CoordinadorDTO {
         this.contrasena = contrasena;
     }
 
-    public String getConfirmarContrasena() {
-        return confirmarContrasena;
-    }
-
-    public void setConfirmarContrasena(String confirmarContrasena) {
-        this.confirmarContrasena = confirmarContrasena;
-    }
-
     public Long getCarreraId() {
         return carreraId;
     }
@@ -66,5 +58,13 @@ public class CoordinadorDTO {
 
     public void setHorarios(List<HorarioDTO> horarios) {
         this.horarios = horarios;
+    }
+
+    public String getConfirmarContrasena() {
+        return confirmarContrasena;
+    }
+
+    public void setConfirmarContrasena(String confirmarContrasena) {
+        this.confirmarContrasena = confirmarContrasena;
     }
 }
