@@ -13,7 +13,8 @@ import org.sample.backendfia.repository.SolicitudRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
@@ -52,15 +53,12 @@ public class ServiceSolicitud implements IServiceSolicitud {
     public SolicitudDTO save(SolicitudDTO solicitudDTO) {
         Solicitud solicitud = convertToEntity(solicitudDTO);
 
-        // Verificar disponibilidad del coordinador
-        List<Horario> horarios = horarioRepository.findByCoordinadorIdAndDiaSemanaAndHoraInicio(
-                solicitud.getCoordinador().getId(),
-                solicitud.getFechaCita().getDayOfWeek(),
-                solicitud.getFechaCita().toLocalTime()
-        );
+        // Verificar disponibilidad del horario
+        Horario horario = horarioRepository.findById(solicitudDTO.getHorarioId())
+                .orElseThrow(() -> new ResourceNotFoundException("Horario not found with id: " + solicitudDTO.getHorarioId()));
 
-        if (horarios.isEmpty() || !horarios.get(0).getEstado().equals("libre")) {
-            throw new IllegalArgumentException("El coordinador no está disponible en el horario solicitado.");
+        if (!horario.getEstado().equals("libre")) {
+            throw new IllegalArgumentException("El horario no está disponible.");
         }
 
         // Validar el motivo
@@ -69,7 +67,6 @@ public class ServiceSolicitud implements IServiceSolicitud {
         }
 
         // Cambiar el estado del horario a ocupado
-        Horario horario = horarios.get(0);
         horario.setEstado("ocupado");
         horarioRepository.save(horario);
 
@@ -83,15 +80,15 @@ public class ServiceSolicitud implements IServiceSolicitud {
     }
 
     @Override
-    public SolicitudDTO updateFechaCita(Long id, LocalDateTime nuevaFecha) {
+    public SolicitudDTO updateFechaCita(Long id, LocalDate fecha, LocalTime hora) {
         Solicitud solicitud = solicitudRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Solicitud not found with id: " + id));
 
-        // Verificar disponibilidad del coordinador para la nueva fecha
-        List<Horario> horarios = horarioRepository.findByCoordinadorIdAndDiaSemanaAndHoraInicio(
+        // Verificar disponibilidad del coordinador para la nueva fecha y hora
+        List<Horario> horarios = horarioRepository.findByCoordinadorIdAndFechaAndHoraInicio(
                 solicitud.getCoordinador().getId(),
-                nuevaFecha.getDayOfWeek(),
-                nuevaFecha.toLocalTime()
+                fecha,
+                hora
         );
 
         if (horarios.isEmpty() || !horarios.get(0).getEstado().equals("libre")) {
@@ -99,10 +96,10 @@ public class ServiceSolicitud implements IServiceSolicitud {
         }
 
         // Cambiar el estado del horario anterior a libre
-        Horario horarioAnterior = horarioRepository.findByCoordinadorIdAndDiaSemanaAndHoraInicio(
+        Horario horarioAnterior = horarioRepository.findByCoordinadorIdAndFechaAndHoraInicio(
                 solicitud.getCoordinador().getId(),
-                solicitud.getFechaCita().getDayOfWeek(),
-                solicitud.getFechaCita().toLocalTime()
+                solicitud.getFecha(),
+                solicitud.getHora()
         ).get(0);
         horarioAnterior.setEstado("libre");
         horarioRepository.save(horarioAnterior);
@@ -112,7 +109,9 @@ public class ServiceSolicitud implements IServiceSolicitud {
         nuevoHorario.setEstado("ocupado");
         horarioRepository.save(nuevoHorario);
 
-        solicitud.setFechaCita(nuevaFecha);
+        // Actualizar la fecha y hora de la cita en la solicitud
+        solicitud.setFecha(fecha);
+        solicitud.setHora(hora);
         Solicitud updatedSolicitud = solicitudRepository.save(solicitud);
         return convertToDto(updatedSolicitud);
     }
@@ -126,10 +125,10 @@ public class ServiceSolicitud implements IServiceSolicitud {
                 .orElseThrow(() -> new ResourceNotFoundException("Coordinador not found with id: " + nuevoCoordinadorId));
 
         // Verificar disponibilidad del nuevo coordinador
-        List<Horario> horarios = horarioRepository.findByCoordinadorIdAndDiaSemanaAndHoraInicio(
+        List<Horario> horarios = horarioRepository.findByCoordinadorIdAndFechaAndHoraInicio(
                 nuevoCoordinadorId,
-                solicitud.getFechaCita().getDayOfWeek(),
-                solicitud.getFechaCita().toLocalTime()
+                solicitud.getFecha(),
+                solicitud.getHora()
         );
 
         if (horarios.isEmpty() || !horarios.get(0).getEstado().equals("libre")) {
@@ -147,11 +146,7 @@ public class ServiceSolicitud implements IServiceSolicitud {
                 .orElseThrow(() -> new ResourceNotFoundException("Solicitud not found with id: " + id));
 
         // Cambiar el estado del horario a libre
-        Horario horario = horarioRepository.findByCoordinadorIdAndDiaSemanaAndHoraInicio(
-                solicitud.getCoordinador().getId(),
-                solicitud.getFechaCita().getDayOfWeek(),
-                solicitud.getFechaCita().toLocalTime()
-        ).get(0);
+        Horario horario = solicitud.getHorario();
         horario.setEstado("libre");
         horarioRepository.save(horario);
 
@@ -181,15 +176,17 @@ public class ServiceSolicitud implements IServiceSolicitud {
         solicitudDTO.setId(solicitud.getId());
         solicitudDTO.setEstado(solicitud.getEstado());
         solicitudDTO.setFechaSolicitud(solicitud.getFechaSolicitud());
-        solicitudDTO.setFechaCita(solicitud.getFechaCita());
+        solicitudDTO.setFecha(solicitud.getFecha());
+        solicitudDTO.setHora(solicitud.getHora());
         solicitudDTO.setEstudianteId(solicitud.getEstudiante().getId());
         solicitudDTO.setCoordinadorId(solicitud.getCoordinador().getId());
+        solicitudDTO.setHorarioId(solicitud.getHorario().getId());
         solicitudDTO.setMotivo(solicitud.getMotivo());
         solicitudDTO.setDuracionCita(solicitud.getDuracionCita());
         solicitudDTO.setDescripcionMotivo(solicitud.getDescripcionMotivo());
 
         // Establecer el día de la semana en español
-        solicitudDTO.setDiaSemana(solicitud.getFechaCita().getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("es", "ES")));
+        solicitudDTO.setDiaSemana(solicitud.getFecha().getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("es", "ES")));
 
         return solicitudDTO;
     }
@@ -199,7 +196,8 @@ public class ServiceSolicitud implements IServiceSolicitud {
         solicitud.setId(solicitudDTO.getId());
         solicitud.setEstado(solicitudDTO.getEstado());
         solicitud.setFechaSolicitud(solicitudDTO.getFechaSolicitud());
-        solicitud.setFechaCita(solicitudDTO.getFechaCita());
+        solicitud.setFecha(solicitudDTO.getFecha());
+        solicitud.setHora(solicitudDTO.getHora());
 
         // Validar que el ID del coordinador no sea nulo
         if (solicitudDTO.getCoordinadorId() == null) {
@@ -217,10 +215,17 @@ public class ServiceSolicitud implements IServiceSolicitud {
                 .orElseThrow(() -> new ResourceNotFoundException("Estudiante not found with id: " + solicitudDTO.getEstudianteId()));
         solicitud.setEstudiante(estudiante);
 
+        // Validar que el ID del horario no sea nulo
+        if (solicitudDTO.getHorarioId() == null) {
+            throw new IllegalArgumentException("Horario ID must not be null");
+        }
+        Horario horario = horarioRepository.findById(solicitudDTO.getHorarioId())
+                .orElseThrow(() -> new ResourceNotFoundException("Horario not found with id: " + solicitudDTO.getHorarioId()));
+        solicitud.setHorario(horario);
+
         solicitud.setMotivo(solicitudDTO.getMotivo());
         solicitud.setDuracionCita(solicitudDTO.getDuracionCita());
         solicitud.setDescripcionMotivo(solicitudDTO.getDescripcionMotivo());
         return solicitud;
     }
-
 }

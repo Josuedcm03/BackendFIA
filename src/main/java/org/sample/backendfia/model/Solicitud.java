@@ -1,7 +1,8 @@
 package org.sample.backendfia.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 public class Solicitud {
@@ -23,11 +24,17 @@ public class Solicitud {
     @JoinColumn(name = "coordinador_id", nullable = false)
     private Coordinador coordinador;
 
+    @ManyToOne
+    @JoinColumn(name = "horario_id", nullable = false)
+    private Horario horario;
+
     private String estado;
 
-    private LocalDateTime fechaSolicitud;
+    private LocalDate fechaSolicitud;
 
-    private LocalDateTime fechaCita;
+    private LocalDate fecha;
+
+    private LocalTime hora;
 
     @Enumerated(EnumType.STRING)
     private Motivo motivo;
@@ -66,6 +73,14 @@ public class Solicitud {
         this.coordinador = coordinador;
     }
 
+    public Horario getHorario() {
+        return horario;
+    }
+
+    public void setHorario(Horario horario) {
+        this.horario = horario;
+    }
+
     public String getEstado() {
         return estado;
     }
@@ -74,20 +89,28 @@ public class Solicitud {
         this.estado = estado;
     }
 
-    public LocalDateTime getFechaSolicitud() {
+    public LocalDate getFechaSolicitud() {
         return fechaSolicitud;
     }
 
-    public void setFechaSolicitud(LocalDateTime fechaSolicitud) {
+    public void setFechaSolicitud(LocalDate fechaSolicitud) {
         this.fechaSolicitud = fechaSolicitud;
     }
 
-    public LocalDateTime getFechaCita() {
-        return fechaCita;
+    public LocalDate getFecha() {
+        return fecha;
     }
 
-    public void setFechaCita(LocalDateTime fechaCita) {
-        this.fechaCita = fechaCita;
+    public void setFecha(LocalDate fecha) {
+        this.fecha = fecha;
+    }
+
+    public LocalTime getHora() {
+        return hora;
+    }
+
+    public void setHora(LocalTime hora) {
+        this.hora = hora;
     }
 
     public Motivo getMotivo() {

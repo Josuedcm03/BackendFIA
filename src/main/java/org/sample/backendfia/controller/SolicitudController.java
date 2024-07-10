@@ -32,10 +32,11 @@ public class SolicitudController {
         return new ResponseEntity<>(createdSolicitud, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id}/fecha")
     public SolicitudDTO updateFechaCita(@PathVariable Long id, @RequestBody SolicitudDTO solicitudDTO) {
-        return serviceSolicitud.updateFechaCita(id, solicitudDTO.getFechaCita());
+        return serviceSolicitud.updateFechaCita(id, solicitudDTO.getFecha(), solicitudDTO.getHora());
     }
+
 
     @PutMapping("/{id}/coordinador")
     public SolicitudDTO cambiarCoordinador(@PathVariable Long id, @RequestBody Long nuevoCoordinadorId) {

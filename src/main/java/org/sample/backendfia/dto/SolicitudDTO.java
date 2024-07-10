@@ -1,19 +1,22 @@
 package org.sample.backendfia.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import org.sample.backendfia.model.Solicitud.Motivo;
 
 public class SolicitudDTO {
     private Long id;
     private String estado;
-    private LocalDateTime fechaSolicitud;
-    private LocalDateTime fechaCita;
+    private LocalDate fechaSolicitud;
+    private LocalDate fecha;
+    private LocalTime hora;
     private Long estudianteId;
     private Long coordinadorId;
-    private Motivo motivo;
+    private Long horarioId; // Nuevo campo para horario
+    private Motivo motivo; // Utilizar la enumeración
     private int duracionCita;
-    private String diaSemana;
-    private String descripcionMotivo; // Añadir este campo
+    private String descripcionMotivo;
+    private String diaSemana; // Nuevo campo para el día de la semana en español
 
     // Getters y Setters
     public Long getId() {
@@ -32,20 +35,28 @@ public class SolicitudDTO {
         this.estado = estado;
     }
 
-    public LocalDateTime getFechaSolicitud() {
+    public LocalDate getFechaSolicitud() {
         return fechaSolicitud;
     }
 
-    public void setFechaSolicitud(LocalDateTime fechaSolicitud) {
+    public void setFechaSolicitud(LocalDate fechaSolicitud) {
         this.fechaSolicitud = fechaSolicitud;
     }
 
-    public LocalDateTime getFechaCita() {
-        return fechaCita;
+    public LocalDate getFecha() {
+        return fecha;
     }
 
-    public void setFechaCita(LocalDateTime fechaCita) {
-        this.fechaCita = fechaCita;
+    public void setFecha(LocalDate fecha) {
+        this.fecha = fecha;
+    }
+
+    public LocalTime getHora() {
+        return hora;
+    }
+
+    public void setHora(LocalTime hora) {
+        this.hora = hora;
     }
 
     public Long getEstudianteId() {
@@ -64,6 +75,14 @@ public class SolicitudDTO {
         this.coordinadorId = coordinadorId;
     }
 
+    public Long getHorarioId() {
+        return horarioId;
+    }
+
+    public void setHorarioId(Long horarioId) {
+        this.horarioId = horarioId;
+    }
+
     public Motivo getMotivo() {
         return motivo;
     }
@@ -80,19 +99,19 @@ public class SolicitudDTO {
         this.duracionCita = duracionCita;
     }
 
-    public String getDiaSemana() {
-        return diaSemana;
-    }
-
-    public void setDiaSemana(String diaSemana) {
-        this.diaSemana = diaSemana;
-    }
-
     public String getDescripcionMotivo() {
         return descripcionMotivo;
     }
 
     public void setDescripcionMotivo(String descripcionMotivo) {
         this.descripcionMotivo = descripcionMotivo;
+    }
+
+    public String getDiaSemana() {
+        return diaSemana;
+    }
+
+    public void setDiaSemana(String diaSemana) {
+        this.diaSemana = diaSemana;
     }
 }

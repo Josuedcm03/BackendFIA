@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,29 +85,35 @@ public class ServiceCoordinador implements IServiceCoordinador {
 
     private void inicializarHorarios(Coordinador coordinador) {
         List<Horario> horarios = new ArrayList<>();
-        for (DayOfWeek dia : DayOfWeek.values()) {
+        LocalDate startDate = LocalDate.now(); // Fecha inicial para crear horarios
+        LocalDate endDate = startDate.plusWeeks(4); // Ejemplo para 4 semanas de horarios
+
+        for (LocalDate date = startDate; date.isBefore(endDate); date = date.plusDays(1)) {
+            DayOfWeek dia = date.getDayOfWeek();
             if (dia == DayOfWeek.SATURDAY || dia == DayOfWeek.SUNDAY) {
                 continue; // Excluir sábado y domingo
             }
             for (LocalTime hora = LocalTime.of(9, 0); hora.isBefore(LocalTime.of(12, 0)); hora = hora.plusMinutes(30)) {
-                horarios.add(crearHorario(coordinador, dia, hora, hora.plusMinutes(30)));
+                horarios.add(crearHorario(coordinador, dia, date, hora, hora.plusMinutes(30)));
             }
             for (LocalTime hora = LocalTime.of(13, 0); hora.isBefore(LocalTime.of(16, 0)); hora = hora.plusMinutes(30)) {
-                horarios.add(crearHorario(coordinador, dia, hora, hora.plusMinutes(30)));
+                horarios.add(crearHorario(coordinador, dia, date, hora, hora.plusMinutes(30)));
             }
         }
         horarioRepository.saveAll(horarios);
     }
 
-    private Horario crearHorario(Coordinador coordinador, DayOfWeek dia, LocalTime horaInicio, LocalTime horaFin) {
+    private Horario crearHorario(Coordinador coordinador, DayOfWeek dia, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
         Horario horario = new Horario();
         horario.setCoordinador(coordinador);
         horario.setDiaSemana(dia);
+        horario.setFecha(fecha);
         horario.setHoraInicio(horaInicio);
         horario.setHoraFin(horaFin);
         horario.setEstado("libre");
         return horario;
     }
+
 
     private CoordinadorDTO convertToDto(Coordinador coordinador) {
         CoordinadorDTO coordinadorDTO = new CoordinadorDTO();
