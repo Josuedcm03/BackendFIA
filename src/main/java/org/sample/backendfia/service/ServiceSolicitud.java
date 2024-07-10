@@ -186,6 +186,7 @@ public class ServiceSolicitud implements IServiceSolicitud {
         solicitudDTO.setCoordinadorId(solicitud.getCoordinador().getId());
         solicitudDTO.setMotivo(solicitud.getMotivo());
         solicitudDTO.setDuracionCita(solicitud.getDuracionCita());
+        solicitudDTO.setDescripcionMotivo(solicitud.getDescripcionMotivo());
 
         // Establecer el día de la semana en español
         solicitudDTO.setDiaSemana(solicitud.getFechaCita().getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("es", "ES")));
@@ -218,6 +219,7 @@ public class ServiceSolicitud implements IServiceSolicitud {
 
         solicitud.setMotivo(solicitudDTO.getMotivo());
         solicitud.setDuracionCita(solicitudDTO.getDuracionCita());
+        solicitud.setDescripcionMotivo(solicitudDTO.getDescripcionMotivo());
         return solicitud;
     }
 

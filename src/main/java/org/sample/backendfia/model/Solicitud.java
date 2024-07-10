@@ -4,8 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-public class
-Solicitud {
+public class Solicitud {
     public static final String PENDIENTE = "Pendiente";
     public static final String APROBADA = "Aprobada";
     public static final String RECHAZADA = "Rechazada";
@@ -34,6 +33,9 @@ Solicitud {
     private Motivo motivo;
 
     private int duracionCita;
+
+    @Column(length = 500) // Permitir una descripción más larga
+    private String descripcionMotivo;
 
     public enum Motivo {
         PERSONAL, FINANCIERO, ACADEMICO
@@ -102,5 +104,13 @@ Solicitud {
 
     public void setDuracionCita(int duracionCita) {
         this.duracionCita = duracionCita;
+    }
+
+    public String getDescripcionMotivo() {
+        return descripcionMotivo;
+    }
+
+    public void setDescripcionMotivo(String descripcionMotivo) {
+        this.descripcionMotivo = descripcionMotivo;
     }
 }
