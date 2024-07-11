@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.List;
@@ -54,10 +55,13 @@ public class ServiceSolicitud implements IServiceSolicitud {
         Solicitud solicitud = convertToEntity(solicitudDTO);
 
         // Verificar disponibilidad del horario
-        Horario horario = horarioRepository.findById(solicitudDTO.getHorarioId())
-                .orElseThrow(() -> new ResourceNotFoundException("Horario not found with id: " + solicitudDTO.getHorarioId()));
+        List<Horario> horarios = horarioRepository.findByCoordinadorIdAndFechaAndHoraInicio(
+                solicitudDTO.getCoordinadorId(),
+                solicitudDTO.getFecha(),
+                solicitudDTO.getHora()
+        );
 
-        if (!horario.getEstado().equals("libre")) {
+        if (!horarios.isEmpty() && horarios.get(0).getEstado().equals("ocupado")) {
             throw new IllegalArgumentException("El horario no está disponible.");
         }
 
@@ -91,7 +95,7 @@ public class ServiceSolicitud implements IServiceSolicitud {
                 hora
         );
 
-        if (horarios.isEmpty() || !horarios.get(0).getEstado().equals("libre")) {
+        if (!horarios.isEmpty() && horarios.get(0).getEstado().equals("ocupado")) {
             throw new IllegalArgumentException("El coordinador no está disponible en el nuevo horario solicitado.");
         }
 
@@ -108,7 +112,7 @@ public class ServiceSolicitud implements IServiceSolicitud {
         // Actualizar la fecha y hora de la cita en la solicitud
         solicitud.setFecha(fecha);
         solicitud.setHora(hora);
-        solicitud.setHorario(horarios.get(0));
+        solicitud.setHorario(horarios.isEmpty() ? null : horarios.get(0)); // Establecer el nuevo horario si está disponible
         Solicitud updatedSolicitud = solicitudRepository.save(solicitud);
         return convertToDto(updatedSolicitud);
     }
@@ -128,11 +132,12 @@ public class ServiceSolicitud implements IServiceSolicitud {
                 solicitud.getHora()
         );
 
-        if (horarios.isEmpty() || !horarios.get(0).getEstado().equals("libre")) {
+        if (!horarios.isEmpty() && horarios.get(0).getEstado().equals("ocupado")) {
             throw new IllegalArgumentException("El nuevo coordinador no está disponible en el horario solicitado.");
         }
 
         solicitud.setCoordinador(nuevoCoordinador);
+        solicitud.setHorario(horarios.isEmpty() ? null : horarios.get(0)); // Establecer el nuevo horario si está disponible
         Solicitud updatedSolicitud = solicitudRepository.save(solicitud);
         return convertToDto(updatedSolicitud);
     }
@@ -144,8 +149,10 @@ public class ServiceSolicitud implements IServiceSolicitud {
 
         // Cambiar el estado del horario a libre
         Horario horario = solicitud.getHorario();
-        horario.setEstado("libre");
-        horarioRepository.save(horario);
+        if (horario != null) {
+            horario.setEstado("libre");
+            horarioRepository.save(horario);
+        }
 
         solicitud.setEstado(Solicitud.CANCELADA);
         solicitudRepository.save(solicitud);
@@ -160,13 +167,18 @@ public class ServiceSolicitud implements IServiceSolicitud {
 
         if (nuevoEstado.equals(Solicitud.APROBADA)) {
             // Cambiar el estado del horario a ocupado si la solicitud es aprobada
-            horario.setEstado("ocupado");
+            if (horario != null) {
+                horario.setEstado("ocupado");
+                horarioRepository.save(horario);
+            }
         } else if (nuevoEstado.equals(Solicitud.RECHAZADA) || nuevoEstado.equals(Solicitud.CANCELADA)) {
             // Cambiar el estado del horario a libre si la solicitud es rechazada o cancelada
-            horario.setEstado("libre");
+            if (horario != null) {
+                horario.setEstado("libre");
+                horarioRepository.save(horario);
+            }
         }
 
-        horarioRepository.save(horario);
         solicitud.setEstado(nuevoEstado);
         Solicitud updatedSolicitud = solicitudRepository.save(solicitud);
         return convertToDto(updatedSolicitud);
@@ -188,7 +200,7 @@ public class ServiceSolicitud implements IServiceSolicitud {
         solicitudDTO.setHora(solicitud.getHora());
         solicitudDTO.setEstudianteId(solicitud.getEstudiante().getId());
         solicitudDTO.setCoordinadorId(solicitud.getCoordinador().getId());
-        solicitudDTO.setHorarioId(solicitud.getHorario().getId());
+        solicitudDTO.setHorarioId(solicitud.getHorario() != null ? solicitud.getHorario().getId() : null);
         solicitudDTO.setMotivo(solicitud.getMotivo());
         solicitudDTO.setDuracionCita(solicitud.getDuracionCita());
         solicitudDTO.setDescripcionMotivo(solicitud.getDescripcionMotivo());

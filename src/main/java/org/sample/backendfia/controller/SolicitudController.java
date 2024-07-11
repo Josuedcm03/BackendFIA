@@ -7,6 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -28,15 +31,20 @@ public class SolicitudController {
 
     @PostMapping
     public ResponseEntity<SolicitudDTO> createSolicitud(@RequestBody SolicitudDTO solicitudDTO) {
+        if (solicitudDTO.getFecha().getDayOfWeek() == DayOfWeek.SATURDAY || solicitudDTO.getFecha().getDayOfWeek() == DayOfWeek.SUNDAY) {
+            throw new IllegalArgumentException("No se pueden solicitar citas los fines de semana.");
+        }
         SolicitudDTO createdSolicitud = serviceSolicitud.save(solicitudDTO);
         return new ResponseEntity<>(createdSolicitud, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}/fecha")
+    @PutMapping("/{id}")
     public SolicitudDTO updateFechaCita(@PathVariable Long id, @RequestBody SolicitudDTO solicitudDTO) {
+        if (solicitudDTO.getFecha().getDayOfWeek() == DayOfWeek.SATURDAY || solicitudDTO.getFecha().getDayOfWeek() == DayOfWeek.SUNDAY) {
+            throw new IllegalArgumentException("No se pueden solicitar citas los fines de semana.");
+        }
         return serviceSolicitud.updateFechaCita(id, solicitudDTO.getFecha(), solicitudDTO.getHora());
     }
-
 
     @PutMapping("/{id}/coordinador")
     public SolicitudDTO cambiarCoordinador(@PathVariable Long id, @RequestBody Long nuevoCoordinadorId) {
