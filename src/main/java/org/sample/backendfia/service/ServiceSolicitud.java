@@ -66,9 +66,9 @@ public class ServiceSolicitud implements IServiceSolicitud {
             throw new IllegalArgumentException("El motivo de la cita es obligatorio.");
         }
 
-        // Cambiar el estado del horario a ocupado
-        horario.setEstado("ocupado");
-        horarioRepository.save(horario);
+        // No cambiar el estado del horario aquí
+        // horario.setEstado("pendiente");
+        // horarioRepository.save(horario);
 
         Solicitud savedSolicitud = solicitudRepository.save(solicitud);
         return convertToDto(savedSolicitud);
@@ -96,22 +96,19 @@ public class ServiceSolicitud implements IServiceSolicitud {
         }
 
         // Cambiar el estado del horario anterior a libre
-        Horario horarioAnterior = horarioRepository.findByCoordinadorIdAndFechaAndHoraInicio(
-                solicitud.getCoordinador().getId(),
-                solicitud.getFecha(),
-                solicitud.getHora()
-        ).get(0);
+        Horario horarioAnterior = solicitud.getHorario();
         horarioAnterior.setEstado("libre");
         horarioRepository.save(horarioAnterior);
 
-        // Cambiar el estado del nuevo horario a ocupado
-        Horario nuevoHorario = horarios.get(0);
-        nuevoHorario.setEstado("ocupado");
-        horarioRepository.save(nuevoHorario);
+        // No cambiar el estado del nuevo horario aquí
+        // Horario nuevoHorario = horarios.get(0);
+        // nuevoHorario.setEstado("pendiente");
+        // horarioRepository.save(nuevoHorario);
 
         // Actualizar la fecha y hora de la cita en la solicitud
         solicitud.setFecha(fecha);
         solicitud.setHora(hora);
+        solicitud.setHorario(horarios.get(0));
         Solicitud updatedSolicitud = solicitudRepository.save(solicitud);
         return convertToDto(updatedSolicitud);
     }
@@ -159,6 +156,17 @@ public class ServiceSolicitud implements IServiceSolicitud {
         Solicitud solicitud = solicitudRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Solicitud not found with id: " + id));
 
+        Horario horario = solicitud.getHorario();
+
+        if (nuevoEstado.equals(Solicitud.APROBADA)) {
+            // Cambiar el estado del horario a ocupado si la solicitud es aprobada
+            horario.setEstado("ocupado");
+        } else if (nuevoEstado.equals(Solicitud.RECHAZADA) || nuevoEstado.equals(Solicitud.CANCELADA)) {
+            // Cambiar el estado del horario a libre si la solicitud es rechazada o cancelada
+            horario.setEstado("libre");
+        }
+
+        horarioRepository.save(horario);
         solicitud.setEstado(nuevoEstado);
         Solicitud updatedSolicitud = solicitudRepository.save(solicitud);
         return convertToDto(updatedSolicitud);

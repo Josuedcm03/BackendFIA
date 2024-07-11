@@ -23,7 +23,7 @@ public class Horario {
 
     private LocalTime horaFin;
 
-    private String estado;
+    private String estado; // libre, ocupado
 
     // Getters y Setters
     public Long getId() {
