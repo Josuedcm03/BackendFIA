@@ -8,6 +8,7 @@ public class NotificacionDTO {
     private String asunto;
     private String mensaje;
     private LocalDateTime fechaEnvio;
+    private Long estudianteId;
 
     // Getters y Setters
     public Long getId() {
@@ -48,5 +49,13 @@ public class NotificacionDTO {
 
     public void setFechaEnvio(LocalDateTime fechaEnvio) {
         this.fechaEnvio = fechaEnvio;
+    }
+
+    public Long getEstudianteId() {
+        return estudianteId;
+    }
+
+    public void setEstudianteId(Long estudianteId) {
+        this.estudianteId = estudianteId;
     }
 }

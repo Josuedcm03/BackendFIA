@@ -2,7 +2,9 @@ package org.sample.backendfia.service;
 
 import org.sample.backendfia.dto.NotificacionDTO;
 import org.sample.backendfia.exception.ResourceNotFoundException;
+import org.sample.backendfia.model.Estudiante;
 import org.sample.backendfia.model.Notificacion;
+import org.sample.backendfia.repository.EstudianteRepository;
 import org.sample.backendfia.repository.NotificacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -18,6 +20,9 @@ public class ServiceNotificacion implements IServiceNotificacion {
 
     @Autowired
     private NotificacionRepository notificacionRepository;
+
+    @Autowired
+    private EstudianteRepository estudianteRepository;
 
     @Autowired
     private JavaMailSender mailSender;
@@ -45,6 +50,14 @@ public class ServiceNotificacion implements IServiceNotificacion {
         return convertToDto(notificacion);
     }
 
+    @Override
+    public List<NotificacionDTO> findByEstudianteId(Long estudianteId) {
+        List<Notificacion> notificaciones = notificacionRepository.findByEstudianteId(estudianteId);
+        return notificaciones.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
     private void sendEmail(Notificacion notificacion) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(notificacion.getDestinatario());
@@ -60,6 +73,7 @@ public class ServiceNotificacion implements IServiceNotificacion {
         notificacionDTO.setAsunto(notificacion.getAsunto());
         notificacionDTO.setMensaje(notificacion.getMensaje());
         notificacionDTO.setFechaEnvio(notificacion.getFechaEnvio());
+        notificacionDTO.setEstudianteId(notificacion.getEstudiante().getId());
         return notificacionDTO;
     }
 
@@ -69,6 +83,11 @@ public class ServiceNotificacion implements IServiceNotificacion {
         notificacion.setDestinatario(notificacionDTO.getDestinatario());
         notificacion.setAsunto(notificacionDTO.getAsunto());
         notificacion.setMensaje(notificacionDTO.getMensaje());
+
+        Estudiante estudiante = estudianteRepository.findById(notificacionDTO.getEstudianteId())
+                .orElseThrow(() -> new ResourceNotFoundException("Estudiante not found with id: " + notificacionDTO.getEstudianteId()));
+        notificacion.setEstudiante(estudiante);
+
         return notificacion;
     }
 }

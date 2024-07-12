@@ -1,11 +1,6 @@
 package org.sample.backendfia.model;
 
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -19,6 +14,10 @@ public class Notificacion {
     private String asunto;
     private String mensaje;
     private LocalDateTime fechaEnvio;
+
+    @ManyToOne
+    @JoinColumn(name = "estudiante_id", nullable = false)
+    private Estudiante estudiante;
 
     // Getters y Setters
     public Long getId() {
@@ -59,5 +58,13 @@ public class Notificacion {
 
     public void setFechaEnvio(LocalDateTime fechaEnvio) {
         this.fechaEnvio = fechaEnvio;
+    }
+
+    public Estudiante getEstudiante() {
+        return estudiante;
+    }
+
+    public void setEstudiante(Estudiante estudiante) {
+        this.estudiante = estudiante;
     }
 }
