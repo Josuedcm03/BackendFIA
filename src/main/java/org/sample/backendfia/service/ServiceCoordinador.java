@@ -2,22 +2,25 @@ package org.sample.backendfia.service;
 
 import org.sample.backendfia.dto.CoordinadorDTO;
 import org.sample.backendfia.dto.HorarioDTO;
+import org.sample.backendfia.dto.SolicitudDTO;
 import org.sample.backendfia.exception.ResourceNotFoundException;
 import org.sample.backendfia.model.Carrera;
 import org.sample.backendfia.model.Coordinador;
 import org.sample.backendfia.model.Horario;
+import org.sample.backendfia.model.Solicitud;
 import org.sample.backendfia.repository.CarreraRepository;
 import org.sample.backendfia.repository.CoordinadorRepository;
 import org.sample.backendfia.repository.HorarioRepository;
-import org.sample.backendfia.service.IServiceCoordinador;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -83,6 +86,15 @@ public class ServiceCoordinador implements IServiceCoordinador {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<SolicitudDTO> getSolicitudesByCoordinadorId(Long coordinadorId) {
+        Coordinador coordinador = coordinadorRepository.findById(coordinadorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Coordinador not found with id: " + coordinadorId));
+        return coordinador.getSolicitudes().stream()
+                .map(this::convertToSolicitudDto)
+                .collect(Collectors.toList());
+    }
+
     private void inicializarHorarios(Coordinador coordinador) {
         List<Horario> horarios = new ArrayList<>();
         LocalDate startDate = LocalDate.now(); // Fecha inicial para crear horarios
@@ -113,7 +125,6 @@ public class ServiceCoordinador implements IServiceCoordinador {
         horario.setEstado("libre");
         return horario;
     }
-
 
     private CoordinadorDTO convertToDto(Coordinador coordinador) {
         CoordinadorDTO coordinadorDTO = new CoordinadorDTO();
@@ -163,5 +174,25 @@ public class ServiceCoordinador implements IServiceCoordinador {
         horario.setDiaSemana(horarioDTO.getDiaSemana());
         horario.setEstado(horarioDTO.getEstado());
         return horario;
+    }
+
+    private SolicitudDTO convertToSolicitudDto(Solicitud solicitud) {
+        SolicitudDTO solicitudDTO = new SolicitudDTO();
+        solicitudDTO.setId(solicitud.getId());
+        solicitudDTO.setEstado(solicitud.getEstado());
+        solicitudDTO.setFechaSolicitud(solicitud.getFechaSolicitud());
+        solicitudDTO.setFecha(solicitud.getFecha());
+        solicitudDTO.setHora(solicitud.getHora());
+        solicitudDTO.setEstudianteId(solicitud.getEstudiante().getId());
+        solicitudDTO.setCoordinadorId(solicitud.getCoordinador().getId());
+        solicitudDTO.setHorarioId(solicitud.getHorario() != null ? solicitud.getHorario().getId() : null);
+        solicitudDTO.setMotivo(solicitud.getMotivo());
+        solicitudDTO.setDuracionCita(solicitud.getDuracionCita());
+        solicitudDTO.setDescripcionMotivo(solicitud.getDescripcionMotivo());
+
+        // Establecer el día de la semana en español
+        solicitudDTO.setDiaSemana(solicitud.getFecha().getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("es", "ES")));
+
+        return solicitudDTO;
     }
 }
