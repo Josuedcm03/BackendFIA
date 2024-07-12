@@ -1,6 +1,7 @@
 package org.sample.backendfia.controller;
 
 import org.sample.backendfia.dto.SolicitudDTO;
+import org.sample.backendfia.dto.UpdateFechaHoraDTO;
 import org.sample.backendfia.service.IServiceSolicitud;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -71,5 +72,10 @@ public class SolicitudController {
     @GetMapping("/estudiante/{estudianteId}")
     public List<SolicitudDTO> getSolicitudesByEstudianteId(@PathVariable Long estudianteId) {
         return serviceSolicitud.findByEstudianteId(estudianteId);
+    }
+    @PutMapping("/{id}/fecha")
+    public ResponseEntity<SolicitudDTO> updateFechaCita(@PathVariable Long id, @RequestBody UpdateFechaHoraDTO request) {
+        SolicitudDTO updatedSolicitud = serviceSolicitud.updateFechaCita(id, request.getFecha(), request.getHora());
+        return ResponseEntity.ok(updatedSolicitud);
     }
 }
