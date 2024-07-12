@@ -1,6 +1,7 @@
 package org.sample.backendfia.model;
 
 import jakarta.persistence.*;
+
 import java.util.List;
 
 @Entity
