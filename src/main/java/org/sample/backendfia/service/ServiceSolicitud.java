@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.List;
@@ -61,19 +60,25 @@ public class ServiceSolicitud implements IServiceSolicitud {
                 solicitudDTO.getHora()
         );
 
-        if (!horarios.isEmpty() && horarios.get(0).getEstado().equals("ocupado")) {
+        if (horarios.isEmpty()) {
+            throw new ResourceNotFoundException("No se encontró un horario disponible para el coordinador y el tiempo seleccionado.");
+        }
+
+        Horario horarioSeleccionado = horarios.get(0);
+
+        if (horarioSeleccionado.getEstado().equals("ocupado")) {
             throw new IllegalArgumentException("El horario no está disponible.");
         }
+
+        // Asignar el ID del horario seleccionado
+        solicitud.setHorario(horarioSeleccionado);
 
         // Validar el motivo
         if (solicitud.getMotivo() == null) {
             throw new IllegalArgumentException("El motivo de la cita es obligatorio.");
         }
 
-        // No cambiar el estado del horario aquí
-        // horario.setEstado("pendiente");
-        // horarioRepository.save(horario);
-
+        // Guardar la solicitud sin cambiar el estado del horario
         Solicitud savedSolicitud = solicitudRepository.save(solicitud);
         return convertToDto(savedSolicitud);
     }
@@ -95,24 +100,22 @@ public class ServiceSolicitud implements IServiceSolicitud {
                 hora
         );
 
-        if (!horarios.isEmpty() && horarios.get(0).getEstado().equals("ocupado")) {
+        if (horarios.isEmpty() || horarios.get(0).getEstado().equals("ocupado")) {
             throw new IllegalArgumentException("El coordinador no está disponible en el nuevo horario solicitado.");
         }
 
         // Cambiar el estado del horario anterior a libre
         Horario horarioAnterior = solicitud.getHorario();
-        horarioAnterior.setEstado("libre");
-        horarioRepository.save(horarioAnterior);
+        if (horarioAnterior != null) {
+            horarioAnterior.setEstado("libre");
+            horarioRepository.save(horarioAnterior);
+        }
 
-        // No cambiar el estado del nuevo horario aquí
-        // Horario nuevoHorario = horarios.get(0);
-        // nuevoHorario.setEstado("pendiente");
-        // horarioRepository.save(nuevoHorario);
-
-        // Actualizar la fecha y hora de la cita en la solicitud
+        // Asignar el nuevo horario y no cambiar el estado del nuevo horario aquí
+        Horario nuevoHorario = horarios.get(0);
         solicitud.setFecha(fecha);
         solicitud.setHora(hora);
-        solicitud.setHorario(horarios.isEmpty() ? null : horarios.get(0)); // Establecer el nuevo horario si está disponible
+        solicitud.setHorario(nuevoHorario);
         Solicitud updatedSolicitud = solicitudRepository.save(solicitud);
         return convertToDto(updatedSolicitud);
     }
@@ -132,12 +135,12 @@ public class ServiceSolicitud implements IServiceSolicitud {
                 solicitud.getHora()
         );
 
-        if (!horarios.isEmpty() && horarios.get(0).getEstado().equals("ocupado")) {
+        if (horarios.isEmpty() || horarios.get(0).getEstado().equals("ocupado")) {
             throw new IllegalArgumentException("El nuevo coordinador no está disponible en el horario solicitado.");
         }
 
         solicitud.setCoordinador(nuevoCoordinador);
-        solicitud.setHorario(horarios.isEmpty() ? null : horarios.get(0)); // Establecer el nuevo horario si está disponible
+        solicitud.setHorario(horarios.get(0));
         Solicitud updatedSolicitud = solicitudRepository.save(solicitud);
         return convertToDto(updatedSolicitud);
     }
@@ -235,13 +238,19 @@ public class ServiceSolicitud implements IServiceSolicitud {
                 .orElseThrow(() -> new ResourceNotFoundException("Estudiante not found with id: " + solicitudDTO.getEstudianteId()));
         solicitud.setEstudiante(estudiante);
 
-        // Validar que el ID del horario no sea nulo
-        if (solicitudDTO.getHorarioId() == null) {
-            throw new IllegalArgumentException("Horario ID must not be null");
+        // Asignar el horario basado en la disponibilidad del coordinador, la fecha y la hora
+        List<Horario> horarios = horarioRepository.findByCoordinadorIdAndFechaAndHoraInicio(
+                solicitudDTO.getCoordinadorId(),
+                solicitudDTO.getFecha(),
+                solicitudDTO.getHora()
+        );
+
+        if (horarios.isEmpty()) {
+            throw new ResourceNotFoundException("No se encontró un horario disponible para el coordinador y el tiempo seleccionado.");
         }
-        Horario horario = horarioRepository.findById(solicitudDTO.getHorarioId())
-                .orElseThrow(() -> new ResourceNotFoundException("Horario not found with id: " + solicitudDTO.getHorarioId()));
-        solicitud.setHorario(horario);
+
+        Horario horarioSeleccionado = horarios.get(0);
+        solicitud.setHorario(horarioSeleccionado);
 
         solicitud.setMotivo(solicitudDTO.getMotivo());
         solicitud.setDuracionCita(solicitudDTO.getDuracionCita());
